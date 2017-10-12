@@ -1,3 +1,3 @@
-NLP project\n
-Comments emotion classification\n
-Used model: SVM\n
+NLP project.
+Comments emotion classification.
+Used model: SVM.
