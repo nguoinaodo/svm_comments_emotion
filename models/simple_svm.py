@@ -57,6 +57,7 @@ class SimpleSVM:
 		b = np.mean(yS - w.dot(XS.T))
 		return w, b	
 
+	# Predict class labels (1, -1)	
 	def predict(self, X):
 		N, D = X.shape
 		y = self._b + self._w.dot(X.T)
