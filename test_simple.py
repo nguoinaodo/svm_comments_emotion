@@ -1,4 +1,4 @@
-from models.simple_svm import SimpleSVM
+from models.svm import SVM
 import numpy as np
 
 # Data
@@ -11,7 +11,7 @@ X = np.concatenate((X0, X1), axis=0)
 y = np.concatenate((np.ones(n), -1. * np.ones(n)))
 
 # Model
-clf = SimpleSVM()
+clf = SVM()
 # Fitting
 clf.fit(X, y)
 

@@ -1,0 +1,192 @@
+”&& " 
+“&& " 
+:\s*\)(\s*\))+&&:))
+:\s\)&&:)
+\^\s\^&&^^
+\!(\s\!)+&&!!!
+p\s*\/\s*s&&p/s
+\.(\s\.)+&&...
+:\s\(&&:(
+\?(\s\?)+&&???
+:\s"\s>&&:">
+:\s3&&:3
+\s:\s\/\s\/\s&&://
+=\(*(\s*\()+&&=((
+=\s\(&&=(
+=\s*](\s*])+&&=]]
+-\s>&&->
+:\sv&&:v
+\^\s\.\s\^&&^.^
+@\s@&&@@
+:\sp&&:p
+=\sD&&=D
+:\sD&&:D
+=\s*\)(\s*\))+&&=)))
+\s\/\s.\s\/\s&&/.../
+\s-\s.\s\/\s&&-.../
+\*(\s\*)+&&***
+=(\s=)+&& 
+T\s\.\sT&&T.T
+:\s'\s\(&&:'(
+-\s>&&->
+www\s\.\s&&www.
+iphone\s5&&iphone_5
+iphone\s6&&iphone_6
+iphone\s7&&iphone_7
+iphone\s10&&iphone_10
+iphone\s8&&iphone_8
+iphone\sx+&&iphone_x
+iphone\sse&&iphone_se
+\s\?\sfbid&&?fbid
+fbid\s=\s&&fbid=
+set\s=\s&&set=
+type\s=\s&&type=
+\s\/\s\?\s&&/?
+\s=\s&&=
+\sj\s&& gì 
+hqua&&hôm_qua
+đm&&dm
+bây\sh&&bây_giờ
+don\s'\st&&don't
+\s'\ss&&'s
+hok&&không
+IP_SE&&iphone_se
+IP_X&&iphone_x
+https?:\/\/\s*(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)&& 
+\s\s+&& 
+#\slinkhay&& 
+đth&&điện_thoại
+đt&&điện_thoại
+<\s3&&<3
+:\s\|&&:|
+\?\?&& ?? 
+\w+\s+a\slink&& 
+\S+\sfrom.*\spost&& 
+\S+\sshared.*post\s(video)*&& 
+mẹt&&mặt
+nhứt&&nhất
+\se\s&& em 
+ngệ&&nghệ
+\sa\s*e\s&& anh_em 
+\S+\sshared\sa\smemory&& 
+Ảnh.*:&& 
+ơi+&&ơi
+\S+ấm\sđể\smở_rộng\s&& 
+if\sx&&iphone_x
+Tưởng.*không_tưởng.*!&& 
+Những\sthay_đổi.*quá\sđẹp\s!&& 
+\s\s+&& 
+\S+\sadded.*photos&& 
+\S+\sadded.*album&& 
+haiz+&&haiz
+\S+\sđã nói\s:&& 
+Ai_Phôn&&iphone
+Liên_hệ\squảng_cáo.+Huy\s:&& 
+\S+\sis\swith\s\S+(\sand.*others)*(\sin\S+)*&& 
+https*&& 
+\S+\.com&& 
+\?.*=\s*\S+&& 
+mom&&mẹ
+mứi&&mới
+haha+&&haha
+make\sup&&make_up
+bnhiu&&bao_nhiêu
+mi+&&mi
+đếu&&đéo
+Đệt\smẹ&&dm
+đây+&&đây
+xiền\w*&&tiền
+haah\w*&&haha
+thui+&&thôi
+hix+&&hix
+hjx+&&hix
+hic&&hix
+\sk\n&& không\n
+\sk\s&& không 
+éo&&đéo
+T_+T&&T_T
+i\sfan&&ifan
+fakelove&& 
+trc&&trước
+đ\S+éo&&đéo
+@\stoan\stran\s1992&& 
+đíu&&đéo
+zậy&&vậy
+lun&&luôn
+kkk+&&kkk
+\d{9}\d+&& 
+\S+=\S+&& 
+đii+&&đi
+\S+\s*is\sat\s*\S+&& 
+THUYẾT_(\S+\s)*&& 
+tường_thuật.*sự_kiện&& 
+fptshop&& 
+ra.mắt&& 
+sự.kiện&& 
+đc&&được
+lsao&&làm_sao
+tui&&tôi
+oii+&&ơi
+wuá&&quá
+để.y&&để ý
+hã\s&&hả 
+hemmm*&&không
+\d*(\.\d+){2}&& 
+makeup&&make_up
+_.link.*%.\S+&& 
+\sdc&& được
+\sak&& ạ
+Tinhte\S+&& 
+\s:\n&& \n
+\s:\s&& 
+\s\+\s&& 
+\s\-\s&& 
+địt_mẹ&&dm
+\sđh\s&& đại học 
+trùi&&trời
+\S+ẹp+&&đẹp
+\sko\s&& không 
+chữi&&chửi
+bữa.h&&bữa giờ
+\S*:\/\/t\.co\S+&& 
+post\sby\s\S+&& 
+instagram&& 
+thân+&&thân
+nek&&nè
+chời&&trời
+gìi*\?*&&gì 
+\d+-\d+&& 
+sao+&&sao
+\d+tr*\d+k*&& 
+aifan&&ifan
+\S+\sđã\snói\s*:&& 
+xxxx+&&xxx
+xx+&&x
+\d+\/\d+\/\d{4}&& 
+đaoo+&&đau
+tym&&tim
+fim&&phim
+apple\S+&&apple
+samesung&&ss
+thoy&&thôi
+hoy&&thôi
+huhuu+&&huhu
+kaka\S+&&kaka
+\/&& / 
+đg&&đường
+sn&&sinh_nhật
+đa&&đã
+đk&&được
+dzui&&vui
+\soi\s&& ơi 
+\S+\sshared\sa\slink&& 
+\S+\swas\sfeeling&& 
+\S+\swas\s.*miracle&&cầu_nguyện
+\S+\sis\sfeeling&& 
+"&& 
+\.&& 
+\?\n&& ?\n
+\?&& ? 
+Tưởng\skhông\sđẹp.*không_tưởng&& 
+Ảnh\sthực_tế\siphone_x_&& 
+\s\s+&& 
