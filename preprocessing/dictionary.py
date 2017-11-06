@@ -3,14 +3,16 @@ import re
 from stopword import read_stop_words, eliminate_stop_words
 
 def create_dict(docs, stopwords):
+	vi_dict = load_vi_dict('vv-dict')
 	dic = {}
 	count = 0
-	reg = re.compile('\s+|\.+|\,+|\b|&|~')
+	reg = re.compile('\s+|\.+|\,+|\b|&|~|"')
 	for doc in docs:
 		doc = eliminate_stop_words(doc.lower(), stopwords)
 		tokens = re.split(reg, doc)
 		for t in tokens:
-			if dic.has_key(t) == False:
+			if dic.has_key(t) == False:# and vi_dict.has_key(t): 
+					# and vi_dict.has_key(t) == True:
 				dic[t] = count
 				count += 1
 	return dic

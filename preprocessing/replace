@@ -183,10 +183,17 @@ dzui&&vui
 \S+\swas\sfeeling&& 
 \S+\swas\s.*miracle&&cầu_nguyện
 \S+\sis\sfeeling&& 
-"&& 
 \.&& 
 \?\n&& ?\n
 \?&& ? 
 Tưởng\skhông\sđẹp.*không_tưởng&& 
 Ảnh\sthực_tế\siphone_x_&& 
 \s\s+&& 
+"&& .
+four&& .
+limogé&& 
+Ôiước&& ôi ước
+nguyễn_tuấns&& .
+iphone_x\S+&&iphone_x
+coi_hoài_linh&& 
+\d+ml&& 
