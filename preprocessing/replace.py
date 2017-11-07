@@ -18,21 +18,3 @@ def replace(fromfile, tofile, replaces):
 			s = re.sub(r[0], r[1], s)
 		with open(tofile, 'w') as f1:
 			f1.write(s)
-			
-def main():
-	replaces = get_replaces('replace')
-	# replace('../data/tokenized/iphone_train_tokenized.csv', \
-	# 		'../data/cleaned/iphone_train_tokenized.csv', replaces)
-	# replace('../data/tokenized/iphone_dev_tokenized.csv', \
-	# 		'../data/cleaned/iphone_dev_tokenized.csv', replaces)
-	# replace('../data/tokenized/NEGATIVE_TOKENIZED.csv', \
-	# 		'../data/cleaned/NEGATIVE_TOKENIZED.csv', replaces)
-	# replace('../data/tokenized/POSITIVE_TOKENIZED.csv', \
-	# 		'../data/cleaned/POSITIVE_TOKENIZED.csv', replaces)
-	replace('../data/tokenized/TRAIN.csv', \
-			'../data/cleaned/TRAIN.csv', replaces)
-	replace('../data/tokenized/TEST.csv', \
-			'../data/cleaned/TEST.csv', replaces)
-
-
-main()
