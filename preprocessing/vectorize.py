@@ -1,5 +1,5 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
-from lib.word2vec_vectorizer import AverageWord2Vec
+from lib.word2vec_vectorizer import AverageWord2Vec, TfidfWord2Vec
 import numpy as np
 import re
 from scipy.sparse import coo_matrix, vstack
@@ -15,6 +15,12 @@ def tfidf_vectorizer(train_contents):
 
 # Word2vec vectorizer
 def average_word2vec_vectorizer(train_contents, size=100):
-	vectorizer = AverageWord2Vec(size=100)
+	vectorizer = AverageWord2Vec(size=size)
+	vectorizer.fit(train_contents)
+	return vectorizer
+
+# Tf-idf word2vec vectorizer
+def tfidf_word2vec_vectorizer(train_contents, size=100):
+	vectorizer = TfidfWord2Vec(size=size)
 	vectorizer.fit(train_contents)
 	return vectorizer

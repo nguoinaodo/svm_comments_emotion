@@ -1,6 +1,7 @@
 from preprocessing.replace import get_replaces, replace
 from preprocessing.read import read_lines, split_label_content, split_lines
-from preprocessing.vectorize import tfidf_vectorizer, average_word2vec_vectorizer
+from preprocessing.vectorize import tfidf_vectorizer, average_word2vec_vectorizer, \
+		tfidf_word2vec_vectorizer
 import numpy as np
 import pickle
 import time
@@ -19,9 +20,9 @@ def main(replace=True, preprocess=True, train=True, test=True):
 	cleaned_dir = '%scleaned/' % data_dir
 
 	vectorizer_type = 'avg-w2v'
-	vector_size = 200 # only use if vectorizer type is w2v, else None
+	vector_size = 100 # only use if vectorizer type is w2v, else None
 
-	Cs = [2]
+	Cs = [1, 5, 7, 10]
 	gammas = [1]
 	kernels= ['rbf', 'sigmoid']
 
@@ -38,7 +39,6 @@ def main(replace=True, preprocess=True, train=True, test=True):
 	make_dirs(cleaned_dir)
 	make_dirs(vectorized_dir)
 	# Test models
-	log = open('log/result.txt', 'a')
 	for C in Cs:
 		for gamma in gammas:
 			for kernel in kernels:
@@ -80,8 +80,8 @@ def main(replace=True, preprocess=True, train=True, test=True):
 				if test:
 					score = model.score(test_features, test_labels)
 					save_score(score, score_file)
-					log.write('%s_____________%f\n' % (result_dir, score))				
-	log.close()				
+					with open('log/result.txt', 'a') as log:
+						log.write('%s_____________%f\n' % (result_dir, score))				
 	
 # Save pkl file
 def save_pickle(obj, filename):
@@ -142,6 +142,8 @@ def _vectorize(train_contents, test_contents, vectorizer_file=None, \
 			vectorizer = tfidf_vectorizer(train_contents)
 		elif vectorizer_type == 'avg-w2v':
 			vectorizer = average_word2vec_vectorizer(train_contents, size=vector_size)
+		elif vectorizer_type == 'tfidf-w2v':
+			vectorizer = tfidf_word2vec_vectorizer(train_contents, size=vector_size)
 		else:
 			return	
 			

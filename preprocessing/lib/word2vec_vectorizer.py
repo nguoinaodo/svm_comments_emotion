@@ -33,26 +33,34 @@ def load_pickle(filename):
 		obj = pickle.load(f)
 		return obj
 
-class AverageWord2Vec:
-	def __init__(self, size=100, window=5, min_count=5, workers=4, w2vModel=None):
+class Word2VecVectorizer:
+	def __init__(self, size=100, window=5, min_count=5, workers=4, word_vectors=None):
 		self.size = size
 		self.window = window
 		self.min_count = min_count
 		self.workers = workers
-		self.w2vModel = w2vModel
-		if w2vModel:
-			self.word_vectors = w2vModel.wv
+		self.word_vectors = word_vectors
 
-	def info(self):		
-		return 'avg-w2v-size%d-min_count%d' % (self.size, self.min_count)
+	def fit(self, lines):
+		pass
+
+	def transform(self, lines):
+		pass
+
+	def save(self, filename):
+		save_pickle(self, filename)
+
+class AverageWord2Vec(Word2VecVectorizer):
+	def __init__(self, size=100, window=5, min_count=5, workers=4, word_vectors=None):
+		Word2VecVectorizer.__init__(self, size=100, window=5, min_count=5, workers=4, word_vectors=None )
 
 	def fit(self, lines):
 		# Split lines to sentences
 		sentences = split_lines(lines)
 		# Fit model
-		self.w2vModel = Word2Vec(sentences, size=self.size, window=self.window, \
+		w2vModel = Word2Vec(sentences, size=self.size, window=self.window, \
 				min_count=self.min_count, workers=self.workers)
-		self.word_vectors = self.w2vModel.wv	
+		self.word_vectors = w2vModel.wv	
 
 	def transform(self, lines):
 		result = []
@@ -72,65 +80,38 @@ class AverageWord2Vec:
 			result.append(vec)
 		return np.array(result)
 
-	def save(self, filename):
-		save_pickle(self.w2vModel, filename)
-
-class TfidfWord2Vec:
-	def __init__(self):
-		pass
+class TfidfWord2Vec(Word2VecVectorizer):
+	def __init__(self, size=100, window=5, min_count=5, workers=4, tfidf_vectorizer=None, word_vectors=None):
+		Word2VecVectorizer.__init__(self, size=100, window=5, min_count=5, workers=4, word_vectors=None)
+		self.tfidf_vectorizer = tfidf_vectorizer
 
 	def fit(self, lines):
-		pass 
-
+		# Tfidf
+		self.tfidf_vectorizer = TfidfVectorizer()
+		self.tfidf_vectorizer.fit(lines)
+		# Split lines to sentences  
+		sentences = split_lines(lines)
+		# Word2vec
+		w2vModel = Word2Vec(sentences, size=self.size, window=self.window, \
+				min_count=self.min_count, workers=self.workers)
+		self.word_vectors = w2vModel.wv
+		
 	def transform(self, lines):
-		pass
-
-
-def vectorize_word2vec(trainfile, testfile):
-	train = []
-	train_labels = []
-	test = []
-	test_labels = []
-	# Train
-	lines = read_lines(trainfile)
-	train_lines = split_lines(lines)
-	for line in train_lines:
-		train.append(line[1:])
-		train_labels.append(line[0])
-	train_labels = np.array(train_labels)
-	# Test
-	lines = read_lines(testfile)
-	test_lines = split_lines(lines)
-	for line in test_lines:
-		test.append(line[1:])
-		test_labels.append(line[0])	
-	test_labels = np.array(test_labels)
-	# Word2vec
-	size = 200
-	model = Word2Vec(train, size=size, window=5, min_count=5, workers=4)
-	wv = model.wv # word vectors
-	# To vector
-	train_features = []
-	test_features = []
-	for s in train:
-		s_vec = np.zeros(size)
-		count = 0
-		for w in s:
-			if w in wv.vocab:
-				count += 1
-				s_vec += wv[w]
-		s_vec = 1. * s_vec / count
-		train_features.append(s_vec)
-	for s in test:
-		s_vec = np.zeros(size)
-		count = 0
-		for w in s:
-			if w in wv.vocab:
-				count += 1
-				s_vec += wv[w]
-		s_vec = 1. * s_vec / count
-		test_features.append(s_vec)
-	train_features = np.array(train_features)
-	test_features = np.array(test_features)
-
-	return train_features, train_labels, test_features, test_labels
+		result = []
+		# Split lines to sentences
+		sentences = split_lines(lines)
+		tfidf_vocab = self.tfidf_vectorizer.vocabulary_
+		tfidf_matrix = self.tfidf_vectorizer.transform(lines)
+		for i in range(len(sentences)):
+			vec = np.zeros(self.size)
+			count = 0
+			for token in sentences[i]:
+				try:
+					vec += self.word_vectors[token] * tfidf_matrix[i, tfidf_vocab[token]]
+					count += 1
+				except KeyError:
+					continue
+			if count != 0:
+				vec = vec / count
+			result.append(vec)
+		return np.array(result)	
