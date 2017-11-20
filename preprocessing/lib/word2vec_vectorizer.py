@@ -3,6 +3,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np 
 import re
 import pickle
+from utils import split_lines
 
 """
 Doc2Vec : you can train your dataset using Doc2Vec and then use the sentence vectors.
@@ -12,26 +13,6 @@ Average of Word2Vec vectors with TF-IDF : this is one of the best approach which
 		Just take the word vectors and multiply it with their TF-IDF scores. 
 		Just take the average and it will represent your sentence vector.
 """
-
-# Split each line into tokens array
-def split_lines(lines):
-	result = []
-	reg = r'\s+|\.+|\,+|\b|&|~|"'
-	for line in lines:
-		tokens = re.split(reg, line)
-		result.append(tokens)
-	return result
-
-# Save pkl file
-def save_pickle(obj, filename):
-	with open(filename, 'wb') as f:
-		pickle.dump(obj, f)
-
-# Load pkl file
-def load_pickle(filename):
-	with open(filename, 'rb') as f:
-		obj = pickle.load(f)
-		return obj
 
 class Word2VecVectorizer:
 	def __init__(self, size=100, window=5, min_count=5, workers=4, word_vectors=None):
@@ -46,9 +27,6 @@ class Word2VecVectorizer:
 
 	def transform(self, lines):
 		pass
-
-	def save(self, filename):
-		save_pickle(self, filename)
 
 class AverageWord2Vec(Word2VecVectorizer):
 	def __init__(self, size=100, window=5, min_count=5, workers=4, word_vectors=None):

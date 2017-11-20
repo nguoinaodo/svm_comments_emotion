@@ -1,7 +1,8 @@
 from preprocessing.replace import get_replaces, replace
 from preprocessing.read import read_lines, split_label_content, split_lines
 from preprocessing.vectorize import tfidf_vectorizer, average_word2vec_vectorizer, \
-		tfidf_word2vec_vectorizer
+		tfidf_word2vec_vectorizer, tfidf_lsa_vectorizer, count_emotion_vectorizer, \
+		tfidf_emotion_vectorizer
 import numpy as np
 import pickle
 import time
@@ -15,18 +16,20 @@ data_dir = '../dataset/iphone/'
 
 def main(replace=True, preprocess=True, train=True, test=True):
 	# Params
-	replace_file = '%sreplace/replace.txt' % data_dir
+	replace_file = '%sreplace/replace2.txt' % data_dir
 	tokenized_dir = '%stokenized/' % data_dir
-	cleaned_dir = '%scleaned/' % data_dir
+	cleaned_dir = '%scleaned2/' % data_dir
+	vnemodic_file = '../dataset/vnemolex/vnemolex.csv'
 
-	vectorizer_type = 'avg-w2v'
-	vector_size = 100 # only use if vectorizer type is w2v, else None
+	vectorizer_type = 'tf-idf'
+	vector_size = None # only use if vectorizer type is w2v, else None
 
-	Cs = [1, 5, 7, 10]
+	# Cs = [1.7,1.8,1.9,2.0,2.1,2.3,2.4,2.5]
+	Cs = [1]
 	gammas = [1]
-	kernels= ['rbf', 'sigmoid']
+	kernels= ['rbf', 'sigmoid', 'linear', 'poly']
 
-	vectorized_dir = '%svectorized/%s/' % (data_dir, vectorizer_type)
+	vectorized_dir = '%svectorized2/%s/' % (data_dir, vectorizer_type)
 	if vector_size:
 		vectorized_dir += '%s/' % vector_size
 
@@ -42,7 +45,7 @@ def main(replace=True, preprocess=True, train=True, test=True):
 	for C in Cs:
 		for gamma in gammas:
 			for kernel in kernels:
-				result_dir = 'result/C%d-gamma%.2f-kernel_%s-%s/' % (C, gamma, kernel, vectorizer_type) 
+				result_dir = 'result/C%.1f-gamma%.2f-kernel_%s-%s/' % (C, gamma, kernel, vectorizer_type) 
 				if vector_size:
 					result_dir = '%s%d/' % (result_dir, vector_size)
 				vectorizer_file = get_vectorizer_file(result_dir)
@@ -51,8 +54,8 @@ def main(replace=True, preprocess=True, train=True, test=True):
 				make_dirs(result_dir)
 				# Replace
 				if replace:
-					_replace('%sTRAIN.csv' % tokenized_dir, '%sTRAIN.csv' % cleaned_dir)
-					_replace('%sTEST.csv' % tokenized_dir, '%sTEST.csv' % cleaned_dir)
+					_replace('%sTRAIN.csv' % tokenized_dir, '%sTRAIN.csv' % cleaned_dir, replace_file)
+					_replace('%sTEST.csv' % tokenized_dir, '%sTEST.csv' % cleaned_dir, replace_file)
 				# Read data then vectorize
 				if preprocess:
 					train_labels, train_contents =  _read('%sTRAIN.csv' % cleaned_dir)
@@ -60,7 +63,8 @@ def main(replace=True, preprocess=True, train=True, test=True):
 					# Vectorize
 					train_features, test_features = _vectorize(train_contents, \
 							test_contents, vectorizer_file=vectorizer_file, vectorizer_type=vectorizer_type, \
-							save=do_save_vectorizer, load=do_load_vectorizer, vector_size=vector_size)
+							save=do_save_vectorizer, load=do_load_vectorizer, vector_size=vector_size, \
+							dicfile=vnemodic_file)
 					# Save features and labels
 					save_pickle((train_features, test_features), features_file)
 					save_pickle((train_labels, test_labels), labels_file)
@@ -133,7 +137,7 @@ def _replace(raw_file, cleaned_file, replace_file):
 
 # Vectorize
 def _vectorize(train_contents, test_contents, vectorizer_file=None, \
-		vectorizer_type='tf-idf', save=False, load=False, vector_size=100):
+		vectorizer_type='tf-idf', save=False, load=False, vector_size=100, dicfile=None):
 	# Vectorizer
 	if vectorizer_file and load:
 		vectorizer = load_pickle(vectorizer_file)
@@ -144,8 +148,14 @@ def _vectorize(train_contents, test_contents, vectorizer_file=None, \
 			vectorizer = average_word2vec_vectorizer(train_contents, size=vector_size)
 		elif vectorizer_type == 'tfidf-w2v':
 			vectorizer = tfidf_word2vec_vectorizer(train_contents, size=vector_size)
+		elif vectorizer_type == 'tfidf-lsa':
+			vectorizer = tfidf_lsa_vectorizer(train_contents, size=vector_size)
+		elif vectorizer_type == 'count-emo':
+			vectorizer = count_emotion_vectorizer(train_contents, dicfile=dicfile)
+		elif vectorizer_type == 'tfidf-emo':
+			vectorizer = tfidf_emotion_vectorizer(train_contents, dicfile=dicfile)
 		else:
-			return	
+			return
 			
 	# Transform
 	train_features = vectorizer.transform(train_contents)
@@ -155,4 +165,4 @@ def _vectorize(train_contents, test_contents, vectorizer_file=None, \
 		save_pickle(vectorizer, vectorizer_file)
 	return train_features, test_features
 
-main(replace=False, preprocess=True, train=True, test=True)
+main(replace=False, preprocess=False, train=True, test=True)
