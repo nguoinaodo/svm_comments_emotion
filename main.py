@@ -1,168 +1,138 @@
 from preprocessing.replace import get_replaces, replace
 from preprocessing.read import read_lines, split_label_content, split_lines
-from preprocessing.vectorize import tfidf_vectorizer, average_word2vec_vectorizer, \
-		tfidf_word2vec_vectorizer, tfidf_lsa_vectorizer, count_emotion_vectorizer, \
-		tfidf_emotion_vectorizer
+from preprocessing.vectorize import tfidf_vectorizer
 import numpy as np
-import pickle
-import time
-from sklearn.svm import SVC
+from sklearn.svm import LinearSVC, SVC
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
-from sklearn.decomposition import PCA
-import os
+from preprocess import replace
+from utils import save_pickle, load_pickle, make_dir
 
-data_dir = '../dataset/iphone/'
+from pprint import pprint
+from time import time
+import logging
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report, f1_score
+from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import learning_curve, validation_curve,\
+			cross_val_score, GridSearchCV
+import matplotlib.pyplot as plt  
+import json
 
-def main(replace=True, preprocess=True, train=True, test=True):
-	# Params
-	replace_file = '%sreplace/replace2.txt' % data_dir
-	tokenized_dir = '%stokenized/' % data_dir
-	cleaned_dir = '%scleaned2/' % data_dir
-	vnemodic_file = '../dataset/vnemolex/vnemolex.csv'
+#!/usr/bin/python
+# -*- coding: utf8 -*-
 
-	vectorizer_type = 'tf-idf'
-	vector_size = None # only use if vectorizer type is w2v, else None
+if __name__ == '__main__':
+	############################### Load data
+	train2 = load_pickle('../dataset/iphone/tokenized/2-class/train.pkl')	
+	test2 = load_pickle('../dataset/iphone/tokenized/2-class/test.pkl')	
+	train3 = load_pickle('../dataset/iphone/tokenized/3-class/train.pkl')	
+	test3 = load_pickle('../dataset/iphone/tokenized/3-class/test.pkl')	
 
-	# Cs = [1.7,1.8,1.9,2.0,2.1,2.3,2.4,2.5]
-	Cs = [1]
-	gammas = [1]
-	kernels= ['rbf', 'sigmoid', 'linear', 'poly']
-
-	vectorized_dir = '%svectorized2/%s/' % (data_dir, vectorizer_type)
-	if vector_size:
-		vectorized_dir += '%s/' % vector_size
-
-	features_file = '%sfeatures.pkl' % vectorized_dir
-	labels_file = '%slabels.pkl' % vectorized_dir
-
-	do_save_vectorizer = False
-	do_load_vectorizer = False
-
-	make_dirs(cleaned_dir)
-	make_dirs(vectorized_dir)
-	# Test models
-	for C in Cs:
-		for gamma in gammas:
-			for kernel in kernels:
-				result_dir = 'result/C%.1f-gamma%.2f-kernel_%s-%s/' % (C, gamma, kernel, vectorizer_type) 
-				if vector_size:
-					result_dir = '%s%d/' % (result_dir, vector_size)
-				vectorizer_file = get_vectorizer_file(result_dir)
-				model_file = get_model_file(result_dir)
-				score_file = get_score_file(result_dir)
-				make_dirs(result_dir)
-				# Replace
-				if replace:
-					_replace('%sTRAIN.csv' % tokenized_dir, '%sTRAIN.csv' % cleaned_dir, replace_file)
-					_replace('%sTEST.csv' % tokenized_dir, '%sTEST.csv' % cleaned_dir, replace_file)
-				# Read data then vectorize
-				if preprocess:
-					train_labels, train_contents =  _read('%sTRAIN.csv' % cleaned_dir)
-					test_labels, test_contents =  _read('%sTEST.csv' % cleaned_dir)
-					# Vectorize
-					train_features, test_features = _vectorize(train_contents, \
-							test_contents, vectorizer_file=vectorizer_file, vectorizer_type=vectorizer_type, \
-							save=do_save_vectorizer, load=do_load_vectorizer, vector_size=vector_size, \
-							dicfile=vnemodic_file)
-					# Save features and labels
-					save_pickle((train_features, test_features), features_file)
-					save_pickle((train_labels, test_labels), labels_file)
-				else:
-					# Load features and labels
-					train_features, test_features = load_pickle(features_file)	
-					train_labels, test_labels = load_pickle(labels_file)	
-				# Train
-				if train:
-					model = SVC(C=C, gamma=gamma, kernel=kernel)
-					model.fit(train_features, train_labels)
-					save_pickle(model, model_file)
-				else:
-					# Load trained model
-					model = load_pickle(model_file)
-				# Test
-				if test:
-					score = model.score(test_features, test_labels)
-					save_score(score, score_file)
-					with open('log/result.txt', 'a') as log:
-						log.write('%s_____________%f\n' % (result_dir, score))				
+	############################### Preprocess
 	
-# Save pkl file
-def save_pickle(obj, filename):
-	with open(filename, 'wb') as f:
-		pickle.dump(obj, f)
+	# Replace
+	replaces = load_pickle('../dataset/iphone/replace/replaces.pkl')	
+	
+	# train2_data = [replace(line, replaces) for line in train2['data']]
+	# test2_data = [replace(line, replaces) for line in test2['data']]
+	# train3_data = [replace(line, replaces) for line in train3['data']]
+	# test3_data = [replace(line, replaces) for line in test3['data']]
 
-# Load pkl file
-def load_pickle(filename):
-	with open(filename, 'rb') as f:
-		obj = pickle.load(f)
-		return obj
+	# save_pickle(train2_data, 'dataset/train2_data')
+	# save_pickle(test2_data, 'dataset/test2_data')
+	# save_pickle(train3_data, 'dataset/train3_data')
+	# save_pickle(test3_data, 'dataset/test3_data')
 
-# Model file
-def get_model_file(result_dir):
-	return '%smodel.pkl' % result_dir
+	train2_data = load_pickle('dataset/train2_data')
+	test2_data = load_pickle('dataset/test2_data')
+	train3_data = load_pickle('dataset/train3_data')
+	test3_data = load_pickle('dataset/test3_data')
 
-# Score file
-def get_score_file(result_dir):
-	return '%sscore.txt' % result_dir
+	# exit(1)
+	############################### Estimator
+	estimator = Pipeline([
+		('count', CountVectorizer(max_df=.5, min_df=10, max_features=1000, ngram_range=(1, 2))),
+		('tfidf', TfidfTransformer()),
+		('clf', SVC())
+	])
+	params = {
+		'clf__C': np.logspace(-2, 4, 10),
+		'clf__gamma': [.01],
+		'clf__kernel': ['rbf', 'sigmoid'] 
+	}
+	cv = GridSearchCV(estimator, params, cv=3, n_jobs=3, verbose=1, refit=1)
+		
+	############################### 2 class
+	result_path = 'result/tfidf-svm-2'
+	make_dir(result_path)	
 
-# Vectorizer file
-def get_vectorizer_file(result_dir):
-	return '%svectorizer.pkl' % result_dir
+	# Fit estimator
+	cv.fit(train2_data, train2['target'])
+	cv_results = cv.cv_results_
+	with open('%s/cv_result' % (result_path), 'w') as f:
+		f.write('CV_result:\n\n')
+		f.write(str(cv_results))
+	mean_train_score = cv_results['mean_train_score']
+	mean_val_score = cv_results['mean_test_score']
 
-# Make dirs if not exists
-def make_dirs(dirpath):
-	if os.path.exists(dirpath) == False:
-		os.makedirs(dirpath)
+	# Plot
+	plt.xlabel('Params')
+	plt.ylabel('Score')
+	plt.plot(mean_train_score, c='r', label='Training score')
+	plt.plot(mean_val_score, c='b', label='Validation score')
+	plt.legend()
+	plt.savefig('%s/val_curve.png' % result_path)
+	plt.show()
 
-# Save test score
-def save_score(score, score_file):
-	with open(score_file, 'w') as f:
-		f.write(str(score))
+	# Best estimator 
+	best_estimator = cv.best_estimator_
+	save_pickle(best_estimator, '%s/est.pkl' % result_path)
+	best_estimator = load_pickle('%s/est.pkl' % result_path)
 
-# Read and split data
-def _read(cleaned_file):
-	# Raw lines
-	lines = read_lines(cleaned_file)
-	# Split labels contents
-	labels, contents = split_label_content(lines)
-	return labels, contents
+	# Test
+	with open('%s/test-result' % result_path, 'w') as f:
+		test_pred = best_estimator.predict(test2_data)
+		f.write(classification_report(test2['target'], test_pred))
 
-# Replace
-def _replace(raw_file, cleaned_file, replace_file):
-	# Replace tokens
-	replaces = get_replaces(replace_file)
-	# Save replaced file
-	replace(raw_file, cleaned_file, replaces)
+	############################### 3 class
+	result_path = 'result/tfidf-svm-3'
+	make_dir(result_path)	
 
-# Vectorize
-def _vectorize(train_contents, test_contents, vectorizer_file=None, \
-		vectorizer_type='tf-idf', save=False, load=False, vector_size=100, dicfile=None):
-	# Vectorizer
-	if vectorizer_file and load:
-		vectorizer = load_pickle(vectorizer_file)
-	else:
-		if vectorizer_type == 'tf-idf':
-			vectorizer = tfidf_vectorizer(train_contents)
-		elif vectorizer_type == 'avg-w2v':
-			vectorizer = average_word2vec_vectorizer(train_contents, size=vector_size)
-		elif vectorizer_type == 'tfidf-w2v':
-			vectorizer = tfidf_word2vec_vectorizer(train_contents, size=vector_size)
-		elif vectorizer_type == 'tfidf-lsa':
-			vectorizer = tfidf_lsa_vectorizer(train_contents, size=vector_size)
-		elif vectorizer_type == 'count-emo':
-			vectorizer = count_emotion_vectorizer(train_contents, dicfile=dicfile)
-		elif vectorizer_type == 'tfidf-emo':
-			vectorizer = tfidf_emotion_vectorizer(train_contents, dicfile=dicfile)
-		else:
-			return
-			
-	# Transform
-	train_features = vectorizer.transform(train_contents)
-	test_features = vectorizer.transform(test_contents)
-	# Save
-	if save and vectorizer_file:
-		save_pickle(vectorizer, vectorizer_file)
-	return train_features, test_features
+	# Fit estimator
+	cv.fit(train3_data, train3['target'])
+	cv_results = cv.cv_results_
+	with open('%s/cv_result' % (result_path), 'w') as f:
+		f.write('CV_result:\n\n')
+		f.write(str(cv_results))
+	mean_train_score = cv_results['mean_train_score']
+	mean_val_score = cv_results['mean_test_score']
 
-main(replace=False, preprocess=False, train=True, test=True)
+	# Plot
+	plt.xlabel('Params')
+	plt.ylabel('Score')
+	plt.plot(mean_train_score, c='r', label='Training score')
+	plt.plot(mean_val_score, c='b', label='Validation score')
+	plt.legend()
+	plt.savefig('%s/val_curve.png' % result_path)
+	plt.show()
+
+	# Best estimator 
+	best_estimator = cv.best_estimator_
+	save_pickle(best_estimator, '%s/est.pkl' % result_path)
+	best_estimator = load_pickle('%s/est.pkl' % result_path)
+	
+	# Test
+	with open('%s/test-result' % result_path, 'w') as f:
+		test_pred = best_estimator.predict(test3_data)
+		f.write(classification_report(test3['target'], test_pred))
+
+	############################### Vocab	
+	vocab = best_estimator.get_params()['count'].vocabulary_.keys()
+	with open('result/vocab', 'w') as f:
+		for w in vocab:
+			print(w)
+			f.write('%s\n' % w.encode('utf8'))
+	
